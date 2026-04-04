@@ -1,0 +1,66 @@
+# ------------------------------
+# Build directories
+# ------------------------------
+build/
+build-*/
+out/
+bin/
+lib/
+
+# ------------------------------
+# CMake generated files
+# ------------------------------
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+install_manifest.txt
+compile_commands.json
+Testing/
+
+# ------------------------------
+# MSVC / Visual Studio artifacts
+# ------------------------------
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.VC.db
+*.VC.opendb
+*.obj
+*.pdb
+*.idb
+*.ilk
+*.ipch
+*.tlog
+*.lastbuildstate
+*.log
+*.tmp
+*.user
+*.suo
+
+# ------------------------------
+# VS Code artifacts
+# ------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ------------------------------
+# vcpkg artifacts
+# ------------------------------
+vcpkg_installed/
+
+# ------------------------------
+# OS junk
+# ------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+
+# 
+prompt.md
