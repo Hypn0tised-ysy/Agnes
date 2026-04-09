@@ -18,6 +18,7 @@ set(AGNES_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(AGNES_SOURCES
 	${AGNES_SRC_DIR}/main.cpp
 	${AGNES_SRC_DIR}/ppm.cpp
+	${AGNES_SRC_DIR}/cli.cpp
 )
 
 set(AGNES_HEADERS
@@ -26,6 +27,7 @@ set(AGNES_HEADERS
 	${AGNES_SRC_DIR}/color.h
 	${AGNES_SRC_DIR}/vec.h
 	${AGNES_SRC_DIR}/agnes_math.h
+	${AGNES_SRC_DIR}/cli.h
 )
 
 add_executable(${AGNES_TARGET})

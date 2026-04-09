@@ -1,0 +1,7 @@
+class Ray
+{
+    public:
+
+    private:
+
+};

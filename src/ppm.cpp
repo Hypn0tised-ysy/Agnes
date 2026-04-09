@@ -8,6 +8,25 @@ const int max_color_value = 255;
 
 void output_ppm_file() {}
 
+static std::filesystem::path ResolveOutputPath(const char *filename) {
+  std::filesystem::path output_path = IMAGE_PATH;
+
+  if (filename != nullptr && filename[0] != '\0') {
+    output_path /= filename;
+  } else {
+    output_path /= "default.ppm";
+  }
+
+  const std::filesystem::path parent_dir = output_path.parent_path();
+  if (parent_dir.empty()) {
+    std::filesystem::create_directories(IMAGE_PATH);
+  } else {
+    std::filesystem::create_directories(parent_dir);
+  }
+
+  return output_path;
+}
+
 void OutputTestPPMFile() {
   static const int width = 256;
   static const int height = 256;
@@ -45,8 +64,7 @@ void OutputTestPPMFile() {
 }
 
 void WritePPMFile(const char *filename, const int width, const int height) {
-  const std::filesystem::path output_path = IMAGE_PATH / filename;
-  std::filesystem::create_directories(IMAGE_PATH);
+  const std::filesystem::path output_path = ResolveOutputPath(filename);
 
   // open file named output.ppm for writing
   FILE *fp = fopen(output_path.string().c_str(), "wb");
@@ -75,8 +93,7 @@ void WritePPMFile(const char *filename, const int width, const int height) {
 
 void WritePPMFile_without_gamma_correction(const char *filename,
                                            const int width, const int height) {
-  const std::filesystem::path output_path = IMAGE_PATH / filename;
-  std::filesystem::create_directories(IMAGE_PATH);
+  const std::filesystem::path output_path = ResolveOutputPath(filename);
 
   // open file named output.ppm for writing
   FILE *fp = fopen(output_path.string().c_str(), "wb");

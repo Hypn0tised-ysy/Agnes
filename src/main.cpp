@@ -1,11 +1,14 @@
+#include "cli.h"
+#include "filepath.h"
 #include "ppm.h"
 
-const char *output_file_name = "output_without_gamma_correction.ppm";
-const int WIDTH = 1024;
-const int HEIGHT = 1024;
+int main(int argc, char *argv[]) {
+  // command line arguments
+  // initialize
+  // render
+  // clean up resource
 
-int main() {
-
-  WritePPMFile_without_gamma_correction(output_file_name, WIDTH, HEIGHT);
+  RenderOptions options = ParseCommandLineArguments(argc, argv);
+  WritePPMFile(options.output_file_name.c_str(), options.width, options.height);
   return 0;
 }
