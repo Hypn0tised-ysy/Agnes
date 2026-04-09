@@ -1,0 +1,96 @@
+{
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 21,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "base-ninja",
+			"hidden": true,
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"cacheVariables": {
+				"CMAKE_CXX_STANDARD": "17",
+				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+				"AGNES_ENABLE_WARNINGS": "ON"
+			}
+		},
+		{
+			"name": "debug",
+			"displayName": "Debug (Ninja)",
+			"inherits": "base-ninja",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "release",
+			"displayName": "Release (Ninja)",
+			"inherits": "base-ninja",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "vs2022",
+			"displayName": "Visual Studio 2022 (x64)",
+			"generator": "Visual Studio 17 2022",
+			"architecture": "x64",
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"cacheVariables": {
+				"AGNES_ENABLE_WARNINGS": "ON"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "build-debug",
+			"configurePreset": "debug",
+			"targets": [
+				"Agnes"
+			]
+		},
+		{
+			"name": "build-release",
+			"configurePreset": "release",
+			"targets": [
+				"Agnes"
+			]
+		},
+		{
+			"name": "build-vs-debug",
+			"configurePreset": "vs2022",
+			"configuration": "Debug",
+			"targets": [
+				"Agnes"
+			]
+		},
+		{
+			"name": "build-vs-release",
+			"configurePreset": "vs2022",
+			"configuration": "Release",
+			"targets": [
+				"Agnes"
+			]
+		}
+	],
+	"testPresets": [
+		{
+			"name": "test-debug",
+			"configurePreset": "debug",
+			"output": {
+				"outputOnFailure": true
+			}
+		},
+		{
+			"name": "test-vs-debug",
+			"configurePreset": "vs2022",
+			"configuration": "Debug",
+			"output": {
+				"outputOnFailure": true
+			}
+		}
+	]
+}
