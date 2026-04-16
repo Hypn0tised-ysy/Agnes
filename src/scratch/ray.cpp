@@ -1,0 +1,17 @@
+#include "vec.h"
+class Ray {
+public:
+  Ray() {}
+  Ray(const point3 &origin, const vec3 &direction)
+      : origin(origin), direction(direction) {}
+
+  const point3 &get_origin() const { return origin; }
+  const vec3 &get_direction() const { return direction; }
+
+  // t here is not time!
+  point3 at(double t) const { return origin + t * direction; }
+
+private:
+  point3 origin;
+  vec3 direction;
+};

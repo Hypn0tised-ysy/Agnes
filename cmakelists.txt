@@ -15,20 +15,27 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(AGNES_TARGET Agnes)
 set(AGNES_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(AGNES_SOURCES
-	${AGNES_SRC_DIR}/main.cpp
-	${AGNES_SRC_DIR}/ppm.cpp
-	${AGNES_SRC_DIR}/cli.cpp
+# Collect sources under src/ while excluding scratch/ experimental code.
+file(GLOB_RECURSE AGNES_SOURCES CONFIGURE_DEPENDS
+	${AGNES_SRC_DIR}/*.c
+	${AGNES_SRC_DIR}/*.cc
+	${AGNES_SRC_DIR}/*.cpp
+	${AGNES_SRC_DIR}/*.cxx
 )
 
-set(AGNES_HEADERS
-	${AGNES_SRC_DIR}/ppm.h
-	${AGNES_SRC_DIR}/filepath.h
-	${AGNES_SRC_DIR}/color.h
-	${AGNES_SRC_DIR}/vec.h
-	${AGNES_SRC_DIR}/agnes_math.h
-	${AGNES_SRC_DIR}/cli.h
+file(GLOB_RECURSE AGNES_HEADERS CONFIGURE_DEPENDS
+	${AGNES_SRC_DIR}/*.h
+	${AGNES_SRC_DIR}/*.hh
+	${AGNES_SRC_DIR}/*.hpp
+	${AGNES_SRC_DIR}/*.hxx
 )
+
+list(FILTER AGNES_SOURCES EXCLUDE REGEX [[/scratch/]])
+list(FILTER AGNES_HEADERS EXCLUDE REGEX [[/scratch/]])
+
+if(AGNES_SOURCES STREQUAL "")
+	message(FATAL_ERROR "No source files found in ${AGNES_SRC_DIR} (excluding scratch).")
+endif()
 
 add_executable(${AGNES_TARGET})
 

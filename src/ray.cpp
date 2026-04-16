@@ -1,7 +1,0 @@
-class Ray
-{
-    public:
-
-    private:
-
-};

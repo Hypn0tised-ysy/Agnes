@@ -1,51 +1,45 @@
-#pragma once
+#ifndef COLOR_H
+#define COLOR_H
 
-#include "agnes_math.h"
+#include <cmath>
+#include <iostream>
+#include <ostream>
+
+#include "interval.h"
+#include "vec3.h"
 
 using color3 = vec3;
 
-inline double Linear2sRGB(double linear_value) {
-  linear_value = clamp(linear_value, 0.0, 1.0);
-  if (linear_value <= 0.0031308) {
-    return linear_value * 12.92;
-  } else {
-    return 1.055 * std::pow(linear_value, 1.0 / 2.4) - 0.055;
-  }
+double linear_to_gamma(double linear_value) {
+  if (linear_value > 0)
+    return std::sqrt(linear_value);
+  return 0;
 }
 
-inline double sRGB2Linear(double rgb_value) {
-  rgb_value = clamp(rgb_value, 0.0, 1.0);
-  if (rgb_value <= 0.04045) {
-    return rgb_value / 12.92;
-  } else {
-    return std::pow((rgb_value + 0.055) / 1.055, 2.4);
-  }
+void write_color(std::ostream &out, color3 const &color) {
+  static interval const intensity_range(0.0, 0.999);
+
+  auto r = color.r;
+  auto g = color.g;
+  auto b = color.b;
+
+  // remove NaN->NaN doesn't equal itself
+  if (r != r)
+    r = 0.0;
+  if (g != g)
+    g = 0.0;
+  if (b != b)
+    b = 0.0;
+
+  r = linear_to_gamma(color.r);
+  g = linear_to_gamma(color.g);
+  b = linear_to_gamma(color.b);
+
+  int rIntensity = int(256 * intensity_range.clamp(r)),
+      gIntensity = int(256 * intensity_range.clamp(g)),
+      bIntensity = int(256 * intensity_range.clamp(b));
+
+  out << rIntensity << " " << gIntensity << " " << bIntensity << "\n";
 }
 
-inline void WriteColor2File(FILE *fp, const color3 &color) {
-  // gamma correction
-  double r = Linear2sRGB(color.x);
-  double g = Linear2sRGB(color.y);
-  double b = Linear2sRGB(color.z);
-
-  // scale to [0, 255]
-  int ir = static_cast<int>(255.999 * r);
-  int ig = static_cast<int>(255.999 * g);
-  int ib = static_cast<int>(255.999 * b);
-
-  fprintf(fp, "%d %d %d\n", ir, ig, ib);
-}
-
-inline void WriteColor2File_without_gamma_correction(FILE *fp,
-                                                     const color3 &color) {
-  double r = clamp(color.x, 0.0, 1.0);
-  double g = clamp(color.y, 0.0, 1.0);
-  double b = clamp(color.z, 0.0, 1.0);
-
-  // scale to [0, 255]
-  int ir = static_cast<int>(255.999 * r);
-  int ig = static_cast<int>(255.999 * g);
-  int ib = static_cast<int>(255.999 * b);
-
-  fprintf(fp, "%d %d %d\n", ir, ig, ib);
-}
+#endif
