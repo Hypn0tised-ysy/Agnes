@@ -8,6 +8,8 @@
 #include "interval.h"
 #include "vec3.h"
 
+//todo: 用一个小工具，方便地用hue选择颜色
+
 using color3 = vec3;
 
 double linear_to_gamma(double linear_value) {
