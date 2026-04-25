@@ -2,6 +2,7 @@
 #define VEC3_H
 
 #include "common.h"
+#include "vec_math.h"
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
@@ -27,25 +28,23 @@ public:
   vec3() : element{0.0, 0.0, 0.0} {};
   vec3(double _x, double _y, double _z) : element{_x, _y, _z} {};
 
-  double norm() const { return std::sqrt(norm_square()); };
-  double norm_square() const { return x * x + y * y + z * z; }
+  double norm() const { return vec<3, double>(x, y, z).norm(); };
+  double norm_square() const { return vec<3, double>(x, y, z).norm_square(); }
 
-  bool nearZero() {
-    double epsilon = 1e-8;
-    return (std::fabs(x) < epsilon) && (std::fabs(y) < epsilon) &&
-           (std::fabs(z) < epsilon);
-  }
+  bool nearZero() { return vec<3, double>(x, y, z).nearZero(); }
 
   static vec3 generate_random_vector() { // 生成[0,1]^3空间内的随机向量
-    return vec3(random_double(), random_double(), random_double());
+    auto v = vec<3, double>::generate_random_vector();
+    return vec3(v[0], v[1], v[2]);
   }
   static vec3 generate_random_vector(double min, double max) {
-    return vec3(random_double(min, max), random_double(min, max),
-                random_double(min, max));
+    auto v = vec<3, double>::generate_random_vector(min, max);
+    return vec3(v[0], v[1], v[2]);
   }
   static vec3 generate_random_vector_onUnitDisk() {
     while (true) {
-      vec3 randomVector = vec3(random_double(), random_double(), 0.0);
+      auto genericRandom = vec<3, double>(random_double(), random_double(), 0.0);
+      vec3 randomVector(genericRandom[0], genericRandom[1], genericRandom[2]);
       if (randomVector.norm_square() <= 1.0)
         return randomVector;
     }
@@ -60,53 +59,75 @@ public:
     return element[ith_element];
   }
 
-  vec3 operator-() const { return vec3(-x, -y, -z); }
+  vec3 operator-() const {
+    auto v = -vec<3, double>(x, y, z);
+    return vec3(v[0], v[1], v[2]);
+  }
 
   vec3 &operator+=(vec3 const &vectorToAdd) {
-    x += vectorToAdd.x;
-    y += vectorToAdd.y;
-    z += vectorToAdd.z;
+    auto sum = vec<3, double>(x, y, z) + vec<3, double>(vectorToAdd.x, vectorToAdd.y, vectorToAdd.z);
+    x = sum[0];
+    y = sum[1];
+    z = sum[2];
     return *this;
   }
 
   vec3 &operator*=(double factor) {
-    x *= factor;
-    y *= factor;
-    z *= factor;
+    auto scaled = vec<3, double>(x, y, z) * factor;
+    x = scaled[0];
+    y = scaled[1];
+    z = scaled[2];
     return *this;
   }
 
   vec3 &operator/=(double divisor) {
-    double reciprocal_divisor = 1 / divisor;
-    *this *= reciprocal_divisor;
+    auto divided = vec<3, double>(x, y, z) / divisor;
+    x = divided[0];
+    y = divided[1];
+    z = divided[2];
     return *this;
   }
+
+  // debug
+  bool hasNaN() const { return vec<3, double>(x, y, z).hasNaN(); }
 };
+
+namespace vec3_detail {
+using generic_vec3 = vec<3, double>;
+
+inline generic_vec3 to_generic(vec3 const &v) {
+  return generic_vec3(v.x, v.y, v.z);
+}
+
+inline vec3 from_generic(generic_vec3 const &v) {
+  return vec3(v[0], v[1], v[2]);
+}
+} // namespace vec3_detail
 
 using point3 = vec3;
 
 std::ostream &operator<<(std::ostream &out, vec3 const &vector) {
-  out << vector.x << ' ' << vector.y << ' ' << vector.z;
+  out << vec3_detail::to_generic(vector);
   return out;
 }
 
 vec3 operator+(vec3 const &leftVector, vec3 const &rightVector) {
-  return vec3(leftVector.x + rightVector.x, leftVector.y + rightVector.y,
-              leftVector.z + rightVector.z);
+  return vec3_detail::from_generic(vec3_detail::to_generic(leftVector) +
+                                   vec3_detail::to_generic(rightVector));
 }
 
 vec3 operator-(vec3 const &leftVector, vec3 const &rightVector) {
-  return vec3(leftVector.x - rightVector.x, leftVector.y - rightVector.y,
-              leftVector.z - rightVector.z);
+  return vec3_detail::from_generic(vec3_detail::to_generic(leftVector) -
+                                   vec3_detail::to_generic(rightVector));
 }
 
 vec3 cwiseProduct(vec3 const &leftVector, vec3 const &rightVector) {
-  return vec3(leftVector.x * rightVector.x, leftVector.y * rightVector.y,
-              leftVector.z * rightVector.z);
+  return vec3_detail::from_generic(cwiseProduct(vec3_detail::to_generic(leftVector),
+                                                vec3_detail::to_generic(rightVector)));
 }
 
 vec3 operator*(double factor, vec3 const &vector) {
-  return vec3(vector.x * factor, vector.y * factor, vector.z * factor);
+  return vec3_detail::from_generic(factor * vec3_detail::to_generic(vector));
 }
 
 vec3 operator*(vec3 const &vector, double factor) { return factor * vector; }
@@ -116,76 +137,57 @@ vec3 operator/(vec3 const &vector, double divisor) {
 }
 
 double dotProduct(vec3 const &leftVector, vec3 const &rightVector) {
-  return leftVector.x * rightVector.x + leftVector.y * rightVector.y +
-         leftVector.z * rightVector.z;
+  return dotProduct(vec3_detail::to_generic(leftVector),
+                    vec3_detail::to_generic(rightVector));
 }
 
 double operator*(vec3 const &leftVector, vec3 const &rightVector) {
-  return leftVector.x * rightVector.x + leftVector.y * rightVector.y +
-         leftVector.z * rightVector.z;
+  return dotProduct(leftVector, rightVector);
 }
 
 vec3 crossProduct(vec3 const &leftVector, vec3 const &rightVector) {
-  return vec3(leftVector.y * rightVector.z - leftVector.z * rightVector.y,
-              leftVector.z * rightVector.x - leftVector.x * rightVector.z,
-              leftVector.x * rightVector.y - leftVector.y * rightVector.x);
+  return vec3_detail::from_generic(
+      crossProduct(vec3_detail::to_generic(leftVector),
+                   vec3_detail::to_generic(rightVector)));
 }
 
-vec3 unit_vector(vec3 const &vector) { return vector / vector.norm(); }
+vec3 unit_vector(vec3 const &vector) {
+  return vec3_detail::from_generic(unit_vector(vec3_detail::to_generic(vector)));
+}
 
 vec3 generate_random_diffused_unitVector() {
-  while (true) {
-    vec3 randomVector = vec3::generate_random_vector(-1.0, 1.0);
-    double norm2 = randomVector.norm_square();
-    if (norm2 > AvoidDivideByZero && norm2 <= 1.0) {
-      return randomVector / std::sqrt(norm2);
-    }
-  }
+  return vec3_detail::from_generic(generate_random_diffused_unitVector<double>());
 }
 
 vec3 generate_random_vector(double min, double max) {
-  return vec3(random_double(min, max), random_double(min, max),
-              random_double(min, max));
+  return vec3_detail::from_generic(generate_random_vector<3, double>(min, max));
 }
 
 vec3 generate_random_diffused_unitVector_onHemisphere(
     vec3 const &normalAgainstRay) {
-  vec3 randomVector = generate_random_diffused_unitVector();
-  randomVector =
-      randomVector * normalAgainstRay > 0.0 ? randomVector : -randomVector;
-  return randomVector;
+  return vec3_detail::from_generic(generate_random_diffused_unitVector_onHemisphere(
+      vec3_detail::to_generic(normalAgainstRay)));
 }
 
 vec3 project(vec3 const &a, vec3 const &ontoB) {
-  return (a * ontoB / ontoB.norm_square()) * ontoB;
+  return vec3_detail::from_generic(
+      project(vec3_detail::to_generic(a), vec3_detail::to_generic(ontoB)));
 }
 
 vec3 reflect(vec3 const &incidentRay, vec3 const &normal) {
-  return incidentRay - 2 * project(incidentRay, normal);
+  return vec3_detail::from_generic(
+      reflect(vec3_detail::to_generic(incidentRay), vec3_detail::to_generic(normal)));
 }
 
 vec3 refract(vec3 const &incidentDirection, vec3 const &normal,
              double etaIncidentOverEtaRefract) {
-  vec3 a = unit_vector(incidentDirection), n = unit_vector(normal);
-  vec3 refract_n_parallel, refract_n_perpendicular;
-  double cos_theta = std::fmin(-(a * n), 1.0);
-  refract_n_perpendicular = etaIncidentOverEtaRefract * (a + cos_theta * n);
-  refract_n_parallel =
-      -std::sqrt(std::fabs(1 - refract_n_perpendicular.norm_square())) * n;
-  return refract_n_parallel + refract_n_perpendicular;
+  return vec3_detail::from_generic(refract(vec3_detail::to_generic(incidentDirection),
+                                           vec3_detail::to_generic(normal),
+                                           etaIncidentOverEtaRefract));
 }
 
 vec3 random_cosine_direction() {
-  // generate distribution: p(omega)=cos(theta)/pi
-  auto r1 = random_double();
-  auto r2 = random_double();
-
-  auto phi = 2 * PI * r1;
-  auto x = std::cos(phi) * std::sqrt(r2);
-  auto y = std::sin(phi) * std::sqrt(r2);
-  auto z = std::sqrt(1 - r2);
-
-  return vec3(x, y, z);
+  return vec3_detail::from_generic(random_cosine_direction<double>());
 }
 
 #endif
