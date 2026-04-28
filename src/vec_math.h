@@ -12,6 +12,8 @@
 
 constexpr double AvoidDivideByZeroVecMath = 1e-160;
 
+class vec3;
+
 // 模板参数分别为：派生类 维度 数据类型
 // CRTP基类
 template <typename Derived, size_t N, typename T = double> class vec_crtp_base {
@@ -357,6 +359,94 @@ template <typename T> vec<3, T> random_cosine_direction() {
 
 template <typename T = double> using vec2 = vec<2, T>;
 template <typename T = double> using vec3t = vec<3, T>;
+
+template <typename T = double, size_t N = 3>
+class Point : public vec_crtp_base<Point<T, N>, N, T> {
+public:
+  Point() { element.fill(T(0)); }
+
+  template <typename... Args, typename = std::enable_if_t<sizeof...(Args) == N>>
+  explicit Point(Args... args) : element{static_cast<T>(args)...} {}
+
+  Point(std::initializer_list<T> init) {
+    assert(init.size() == N);
+    std::copy(init.begin(), init.end(), element.begin());
+  }
+
+  T operator[](size_t i) const {
+    assert(i < N);
+    return element[i];
+  }
+
+  T &operator[](size_t i) {
+    assert(i < N);
+    return element[i];
+  }
+
+private:
+  std::array<T, N> element;
+};
+
+template <typename T> class Point<T, 2> : public vec_crtp_base<Point<T, 2>, 2, T> {
+public:
+  union {
+    struct {
+      T x;
+      T y;
+    };
+    struct {
+      T r;
+      T g;
+    };
+    T element[2];
+  };
+
+  Point() : element{T(0), T(0)} {}
+  Point(T _x, T _y) : element{_x, _y} {}
+
+  T operator[](size_t i) const {
+    assert(i < 2);
+    return element[i];
+  }
+
+  T &operator[](size_t i) {
+    assert(i < 2);
+    return element[i];
+  }
+};
+
+template <typename T> class Point<T, 3> : public vec_crtp_base<Point<T, 3>, 3, T> {
+public:
+  union {
+    struct {
+      T x;
+      T y;
+      T z;
+    };
+    struct {
+      T r;
+      T g;
+      T b;
+    };
+    T element[3];
+  };
+
+  Point() : element{T(0), T(0), T(0)} {}
+  Point(T _x, T _y, T _z) : element{_x, _y, _z} {}
+  Point(vec3 const &v);
+
+  operator vec3() const;
+
+  T operator[](size_t i) const {
+    assert(i < 3);
+    return element[i];
+  }
+
+  T &operator[](size_t i) {
+    assert(i < 3);
+    return element[i];
+  }
+};
 
 // vec3是vec3t<double>，兼容问题就不改了
 using vec2d = vec2<double>;

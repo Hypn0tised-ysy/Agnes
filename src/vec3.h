@@ -34,16 +34,16 @@ public:
   bool nearZero() { return vec<3, double>(x, y, z).nearZero(); }
 
   static vec3 generate_random_vector() { // 生成[0,1]^3空间内的随机向量
-    auto v = vec<3, double>::generate_random_vector();
+    auto v = vec3d::generate_random_vector();
     return vec3(v[0], v[1], v[2]);
   }
   static vec3 generate_random_vector(double min, double max) {
-    auto v = vec<3, double>::generate_random_vector(min, max);
+    auto v = vec3d::generate_random_vector(min, max);
     return vec3(v[0], v[1], v[2]);
   }
   static vec3 generate_random_vector_onUnitDisk() {
     while (true) {
-      auto genericRandom = vec<3, double>(random_double(), random_double(), 0.0);
+      auto genericRandom = vec3d::generate_random_vector(-1.0, 1.0);
       vec3 randomVector(genericRandom[0], genericRandom[1], genericRandom[2]);
       if (randomVector.norm_square() <= 1.0)
         return randomVector;
@@ -60,12 +60,12 @@ public:
   }
 
   vec3 operator-() const {
-    auto v = -vec<3, double>(x, y, z);
+    auto v = -vec3d(x, y, z);
     return vec3(v[0], v[1], v[2]);
   }
 
   vec3 &operator+=(vec3 const &vectorToAdd) {
-    auto sum = vec<3, double>(x, y, z) + vec<3, double>(vectorToAdd.x, vectorToAdd.y, vectorToAdd.z);
+    auto sum = vec3d(x, y, z) + vec3d(vectorToAdd.x, vectorToAdd.y, vectorToAdd.z);
     x = sum[0];
     y = sum[1];
     z = sum[2];
@@ -73,7 +73,7 @@ public:
   }
 
   vec3 &operator*=(double factor) {
-    auto scaled = vec<3, double>(x, y, z) * factor;
+    auto scaled = vec3d(x, y, z) * factor;
     x = scaled[0];
     y = scaled[1];
     z = scaled[2];
@@ -81,7 +81,7 @@ public:
   }
 
   vec3 &operator/=(double divisor) {
-    auto divided = vec<3, double>(x, y, z) / divisor;
+    auto divided = vec3d(x, y, z) / divisor;
     x = divided[0];
     y = divided[1];
     z = divided[2];
@@ -89,11 +89,11 @@ public:
   }
 
   // debug
-  bool hasNaN() const { return vec<3, double>(x, y, z).hasNaN(); }
+  bool hasNaN() const { return vec3d(x, y, z).hasNaN(); }
 };
 
 namespace vec3_detail {
-using generic_vec3 = vec<3, double>;
+using generic_vec3 = vec3d;
 
 inline generic_vec3 to_generic(vec3 const &v) {
   return generic_vec3(v.x, v.y, v.z);
@@ -104,7 +104,11 @@ inline vec3 from_generic(generic_vec3 const &v) {
 }
 } // namespace vec3_detail
 
-using point3 = vec3;
+using point3 = Point<double, 3>;
+
+inline Point<double, 3>::Point(vec3 const &v) : element{v.x, v.y, v.z} {}
+
+inline Point<double, 3>::operator vec3() const { return vec3(x, y, z); }
 
 std::ostream &operator<<(std::ostream &out, vec3 const &vector) {
   out << vec3_detail::to_generic(vector);
